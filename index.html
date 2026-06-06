@@ -1,16 +1,130 @@
+<script>
+
 const SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbw6XAEtQIG0jEhmDRAIHW53ldWJqu3sQ37onc0gYZ2ZSGWumY02ydRamJmHFjlML0JA/exec";
 
+let standingsData = [];
+let selectedPlayer = "";
+
+document
+    .getElementById("playerSelect")
+    .addEventListener("change", (e) => {
+
+        selectedPlayer = e.target.value;
+
+        renderTable();
+    });
+
 async function loadData() {
 
-    const response =
-        await fetch(SCRIPT_URL);
+    try {
 
-    standingsData =
-        await response.json();
+        const response =
+            await fetch(SCRIPT_URL);
 
-    populateDropdown();
-    renderTable();
+        standingsData =
+            await response.json();
+
+        populateDropdown();
+
+        renderTable();
+
+    } catch (error) {
+
+        console.error(
+            "Failed loading data:",
+            error
+        );
+    }
+}
+
+function populateDropdown() {
+
+    const select =
+        document.getElementById(
+            "playerSelect"
+        );
+
+    select.innerHTML =
+        '<option value="">Select Player</option>';
+
+    standingsData
+        .sort((a,b) =>
+            a.name.localeCompare(b.name)
+        )
+        .forEach(player => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                player.name;
+
+            option.textContent =
+                player.name;
+
+            select.appendChild(option);
+        });
+}
+
+function renderTable() {
+
+    const tbody =
+        document.querySelector(
+            "#standingsTable tbody"
+        );
+
+    tbody.innerHTML = "";
+
+    const sortedData =
+        [...standingsData]
+            .sort((a,b) => {
+
+                const aPoints =
+                    Number(
+                        a.adjustedPoints || 0
+                    );
+
+                const bPoints =
+                    Number(
+                        b.adjustedPoints || 0
+                    );
+
+                return bPoints - aPoints;
+            });
+
+    sortedData.forEach(
+        (player,index) => {
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+            if (
+                player.name ===
+                selectedPlayer
+            ) {
+                tr.classList.add(
+                    "highlight"
+                );
+            }
+
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${player.name}</td>
+                <td>${player.wins}</td>
+                <td>${player.losses}</td>
+                <td>${player.adjustedPoints}</td>
+            `;
+
+            tbody.appendChild(tr);
+        }
+    );
 }
 
 loadData();
+
+</script>
