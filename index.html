@@ -91,7 +91,7 @@ tr:nth-child(even){
 <div class="controls">
 
     <select id="nameDropdown">
-        <option value="">Choose a Name</option>
+        <option value="">Select a Name</option>
     </select>
 
     <div id="placementBox">
@@ -266,8 +266,6 @@ function updatePlacement(selectedIndex, requirementIndex)
     }
 
     const placement = selectedIndex - autoQualifiedAbove + 1;
-    document.write(selectedIndex);
-    document.write(autoQualifiedAbove);
 
     placementValue.textContent = placement;
 }
