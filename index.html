@@ -79,7 +79,28 @@ tr:nth-child(even){
     margin-bottom:15px;
     font-weight:bold;
 }
+    
+.cutoff-row td{
+    border-bottom:8px solid #ff4444 !important;
+}
 
+.cutoff-row{
+    position:relative;
+}
+
+.cutoff-row::after{
+    content:"TOP 80 CUTOFF";
+    position:absolute;
+    right:10px;
+    bottom:-22px;
+    background:#ff4444;
+    color:white;
+    font-weight:bold;
+    padding:2px 10px;
+    border-radius:4px;
+    z-index:5;
+}
+    
 </style>
 </head>
 <body>
@@ -91,7 +112,7 @@ tr:nth-child(even){
 <div class="controls">
 
     <select id="nameDropdown">
-        <option value="">Select a Name</option>
+        <option value="">Choose a Name</option>
     </select>
 
     <div id="placementBox">
@@ -199,7 +220,30 @@ function buildTable(selectedName = ""){
         );
 
     let selectedIndex = -1;
+    let cutoffIndex = -1
 
+    if(requirementIndex >= 0){
+
+    let autoQualifiedCount = 0;
+        for(let i = 0; i < tableRows.length; i++){
+            const value = String(tableRows[i][requirementIndex] || "").trim().toLowerCase();
+    
+            if(value.includes("autoqualified")){
+                autoQualifiedCount++;
+            }
+    
+            const placementWithoutAQ =
+                (i + 1) - autoQualifiedCount;
+    
+            if(placementWithoutAQ === 80){
+                cutoffIndex = i;
+                break;
+            }
+        }
+    }
+
+
+    
     if(selectedName){
         selectedIndex =tableRows.findIndex(row => String(row[nameIndex]).trim() === selectedName);
     }
@@ -223,6 +267,10 @@ function buildTable(selectedName = ""){
             tr.id = "selectedRow";
         }
 
+        if(rowIndex === cutoffIndex){
+            tr.classList.add("cutoff-row");
+        }
+        
         row.forEach(cell => {
             const td = document.createElement("td");
             td.textContent = cell ?? "";
