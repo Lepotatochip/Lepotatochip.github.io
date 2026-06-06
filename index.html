@@ -135,22 +135,16 @@ async function loadData(initialLoad = false){
             populateDropdown(data.names || []);
         }
 
-        const selectedName =
-            document.getElementById("nameDropdown").value;
+        const selectedName = document.getElementById("nameDropdown").value;
 
         buildTable(selectedName);
 
-        document.getElementById("status").innerHTML =
-            "Last updated: " +
-            new Date().toLocaleTimeString();
+        document.getElementById("status").innerHTML = "Last updated: " + new Date().toLocaleTimeString();
 
     }
     catch(error){
-
         console.error(error);
-
-        document.getElementById("status").innerHTML =
-            "Failed to load data.";
+        document.getElementById("status").innerHTML = "Failed to load data.";
     }
 }
 
@@ -168,7 +162,6 @@ function populateDropdown(names){
 
         option.value = name;
         option.textContent = name;
-
         dropdown.appendChild(option);
     });
 }
@@ -176,7 +169,6 @@ function populateDropdown(names){
 function buildTable(selectedName = ""){
 
     const thead = document.querySelector("#liveTable thead");
-
     const tbody = document.querySelector("#liveTable tbody");
 
     thead.innerHTML = "";
@@ -189,9 +181,7 @@ function buildTable(selectedName = ""){
     headers.forEach(header => {
 
         const th = document.createElement("th");
-
         th.textContent = header;
-
         headerRow.appendChild(th);
     });
 
@@ -204,14 +194,12 @@ function buildTable(selectedName = ""){
 
     const requirementIndex =
         headers.findIndex(
-            h =>
-                String(h).trim().toLowerCase() === "820 Requirement"
+            h => String(h).trim().toLowerCase() === "820 Requirement"
         );
 
     let selectedIndex = -1;
 
     if(selectedName){
-
         selectedIndex =tableRows.findIndex(row => String(row[nameIndex]).trim() === selectedName);
     }
 
@@ -220,7 +208,6 @@ function buildTable(selectedName = ""){
     tableRows.forEach((row,rowIndex)=>{
 
         if(selectedIndex >= 0){
-
             // Hide anyone more than 10 spots above
             if(rowIndex < selectedIndex - 10){
                 return;
@@ -231,38 +218,28 @@ function buildTable(selectedName = ""){
             document.createElement("tr");
 
         if(rowIndex === selectedIndex){
-
             tr.classList.add("highlight");
-
             tr.id = "selectedRow";
         }
 
         row.forEach(cell => {
-
-            const td =
-                document.createElement("td");
-
+            const td = document.createElement("td");
             td.textContent = cell ?? "";
-
             tr.appendChild(td);
         });
-
         tbody.appendChild(tr);
     });
 
-    const selectedRow =
-        document.getElementById("selectedRow");
+    const selectedRow = document.getElementById("selectedRow");
 
     if(selectedRow){
-
         selectedRow.scrollIntoView({behavior:"smooth",block:"center"});
     }
 }
 
 function updatePlacement(selectedIndex, requirementIndex)
 {
-    const placementValue =
-        document.getElementById("placementValue");
+    const placementValue = document.getElementById("placementValue");
 
     if(selectedIndex < 0 || requirementIndex < 0)
     {
@@ -274,7 +251,6 @@ function updatePlacement(selectedIndex, requirementIndex)
 
     for(let i = 0; i < selectedIndex; i++)
     {
-
         const value =String(tableRows[i][requirementIndex] || "").trim().toLowerCase();
 
         if(value === "autoqualified"){
@@ -283,8 +259,8 @@ function updatePlacement(selectedIndex, requirementIndex)
     }
 
     const placement = selectedIndex - autoQualifiedAbove + 1;
-    console.log(selectedIndex);
-    console.log(autoQualifiedAbove);
+    console.write(selectedIndex);
+    console.write(autoQualifiedAbove);
 
     placementValue.textContent = placement;
 }
