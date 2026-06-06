@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>BFL Live Table</title>
+<title>BFL Leaderboard</title>
 
 <style>
 
 body{
     font-family: Arial, sans-serif;
-    padding:20px;
     background:#f5f5f5;
+    margin:20px;
 }
 
 .container{
-    max-width:1400px;
+    max-width:1600px;
     margin:auto;
 }
 
@@ -23,11 +23,27 @@ h1{
     margin-bottom:20px;
 }
 
+.controls{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
 select{
     padding:10px;
     font-size:16px;
     min-width:300px;
-    margin-bottom:20px;
+}
+
+#placementBox{
+    font-size:18px;
+    font-weight:bold;
+    padding:10px 15px;
+    background:white;
+    border:1px solid #ccc;
+    border-radius:4px;
 }
 
 table{
@@ -40,16 +56,13 @@ th{
     background:#222;
     color:white;
     padding:10px;
+    text-align:left;
     position:sticky;
     top:0;
 }
 
 td{
     padding:8px;
-}
-
-th,
-td{
     border:1px solid #ddd;
 }
 
@@ -58,13 +71,13 @@ tr:nth-child(even){
 }
 
 .highlight{
-    background:#fff3a0 !important;
+    background:#fff39a !important;
     font-weight:bold;
 }
 
-.loading{
-    padding:20px;
-    font-size:18px;
+#status{
+    margin-bottom:15px;
+    font-weight:bold;
 }
 
 </style>
@@ -73,15 +86,22 @@ tr:nth-child(even){
 
 <div class="container">
 
-<h1>BFL Live Table</h1>
+<h1>BFL Leaderboard</h1>
 
-<select id="nameDropdown">
-    <option value="">Select a Name</option>
-</select>
+<div class="controls">
 
-<div id="status" class="loading">
-    Loading data...
+    <select id="nameDropdown">
+        <option value="">Select a Name</option>
+    </select>
+
+    <div id="placementBox">
+        Placement without Autoqualifiers:
+        <span id="placementValue">-</span>
+    </div>
+
 </div>
+
+<div id="status">Loading...</div>
 
 <table id="liveTable">
     <thead></thead>
@@ -93,41 +113,48 @@ tr:nth-child(even){
 <script>
 
 const APPS_SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbz1rw6zdK3yi6oJslDKLBwlE0nE0CUJ9hh27-XYswbfn--S3Z0hHeoJBya0lvO4Ui5q/exec";
+"https://script.google.com/macros/s/AKfycbxSe_fNTDb8jubFaUfxO-ewYPTl-11839rKX4vK8fPmXAg4rlPZydb_1-m9dQWUp7Tv/exec";
 
 let headers = [];
 let tableRows = [];
 
-function loadData() {
+async function loadData(initialLoad = false){
 
-    const script = document.createElement("script");
+    try{
 
-    script.src =
-        APPS_SCRIPT_URL +
-        "?callback=handleData&_=" +
-        new Date().getTime();
+        const response = await fetch(
+            APPS_SCRIPT_URL + "?t=" + Date.now()
+        );
 
-    script.onerror = () => {
+        const data = await response.json();
+
+        headers = data.headers || [];
+        tableRows = data.rows || [];
+
+        if(initialLoad){
+            populateDropdown(data.names || []);
+        }
+
+        const selectedName =
+            document.getElementById("nameDropdown").value;
+
+        buildTable(selectedName);
+
+        document.getElementById("status").innerHTML =
+            "Last updated: " +
+            new Date().toLocaleTimeString();
+
+    }
+    catch(error){
+
+        console.error(error);
+
         document.getElementById("status").innerHTML =
             "Failed to load data.";
-    };
-
-    document.body.appendChild(script);
+    }
 }
 
-function handleData(data) {
-
-    headers = data.headers || [];
-    tableRows = data.rows || [];
-
-    populateDropdown(data.names || []);
-
-    buildTable();
-
-    document.getElementById("status").style.display = "none";
-}
-
-function populateDropdown(names) {
+function populateDropdown(names){
 
     const dropdown =
         document.getElementById("nameDropdown");
@@ -149,7 +176,7 @@ function populateDropdown(names) {
     });
 }
 
-function buildTable(selectedName = "") {
+function buildTable(selectedName = ""){
 
     const thead =
         document.querySelector("#liveTable thead");
@@ -160,7 +187,7 @@ function buildTable(selectedName = "") {
     thead.innerHTML = "";
     tbody.innerHTML = "";
 
-    if (!headers.length) return;
+    if(!headers.length) return;
 
     const headerRow =
         document.createElement("tr");
@@ -177,30 +204,60 @@ function buildTable(selectedName = "") {
 
     thead.appendChild(headerRow);
 
-    const nameColumnIndex =
-        headers.findIndex(h =>
-            String(h)
+    const nameIndex =
+        headers.findIndex(
+            h =>
+                String(h)
                 .trim()
-                .toLowerCase() === "name"
+                .toLowerCase() ===
+                "name"
         );
 
-    tableRows.forEach(row => {
+    const requirementIndex =
+        headers.findIndex(
+            h =>
+                String(h)
+                .trim()
+                .toLowerCase() ===
+                "820 requirement sheet"
+        );
+
+    let selectedIndex = -1;
+
+    if(selectedName){
+
+        selectedIndex =
+            tableRows.findIndex(
+                row =>
+                    String(
+                        row[nameIndex]
+                    ).trim() === selectedName
+            );
+    }
+
+    updatePlacement(
+        selectedIndex,
+        requirementIndex
+    );
+
+    tableRows.forEach((row,rowIndex)=>{
+
+        if(selectedIndex >= 0){
+
+            // Hide anyone more than 10 spots above
+            if(rowIndex < selectedIndex - 10){
+                return;
+            }
+        }
 
         const tr =
             document.createElement("tr");
 
-        if (
-            selectedName &&
-            nameColumnIndex !== -1 &&
-            String(row[nameColumnIndex]).trim() === selectedName
-        ) {
+        if(rowIndex === selectedIndex){
+
             tr.classList.add("highlight");
 
-            // move selected row to top
-            tbody.insertBefore(
-                tr,
-                tbody.firstChild
-            );
+            tr.id = "selectedRow";
         }
 
         row.forEach(cell => {
@@ -209,28 +266,91 @@ function buildTable(selectedName = "") {
                 document.createElement("td");
 
             td.textContent =
-                cell === null ? "" : cell;
+                cell ?? "";
 
             tr.appendChild(td);
         });
 
-        if (!tr.parentNode) {
-            tbody.appendChild(tr);
-        }
-
+        tbody.appendChild(tr);
     });
 
+    const selectedRow =
+        document.getElementById("selectedRow");
+
+    if(selectedRow){
+
+        selectedRow.scrollIntoView({
+            behavior:"smooth",
+            block:"center"
+        });
+    }
+}
+
+function updatePlacement(
+    selectedIndex,
+    requirementIndex
+){
+
+    const placementValue =
+        document.getElementById(
+            "placementValue"
+        );
+
+    if(
+        selectedIndex < 0 ||
+        requirementIndex < 0
+    ){
+        placementValue.textContent = "-";
+        return;
+    }
+
+    let autoQualifiedAbove = 0;
+
+    for(
+        let i = 0;
+        i < selectedIndex;
+        i++
+    ){
+
+        const value =
+            String(
+                tableRows[i][requirementIndex] || ""
+            )
+            .trim()
+            .toLowerCase();
+
+        if(value === "autoqualified"){
+
+            autoQualifiedAbove++;
+        }
+    }
+
+    const placement =
+        selectedIndex -
+        autoQualifiedAbove +
+        1;
+
+    placementValue.textContent =
+        placement;
 }
 
 document
 .getElementById("nameDropdown")
-.addEventListener("change", function() {
+.addEventListener(
+    "change",
+    function(){
 
-    buildTable(this.value);
+        buildTable(this.value);
+    }
+);
 
-});
+loadData(true);
 
-loadData();
+// Refresh every 30 seconds
+setInterval(
+    () => loadData(false),
+    10000
+);
 
 </script>
 
