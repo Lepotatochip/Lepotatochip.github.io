@@ -1,131 +1,225 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>BFL Live Table</title>
 
 <style>
+
 body{
-    font-family:Arial,sans-serif;
-    margin:20px;
+    font-family: Arial, sans-serif;
+    padding:20px;
+    background:#f5f5f5;
+}
+
+.container{
+    max-width:1400px;
+    margin:auto;
+}
+
+h1{
+    margin-bottom:20px;
 }
 
 select{
-    padding:8px;
+    padding:10px;
     font-size:16px;
+    min-width:300px;
     margin-bottom:20px;
 }
 
 table{
-    border-collapse:collapse;
     width:100%;
-}
-
-th,td{
-    border:1px solid #ccc;
-    padding:8px;
-    text-align:left;
+    border-collapse:collapse;
+    background:white;
 }
 
 th{
-    background:#f5f5f5;
+    background:#222;
+    color:white;
+    padding:10px;
+    position:sticky;
+    top:0;
+}
+
+td{
+    padding:8px;
+}
+
+th,
+td{
+    border:1px solid #ddd;
+}
+
+tr:nth-child(even){
+    background:#fafafa;
 }
 
 .highlight{
-    background-color:yellow !important;
+    background:#fff3a0 !important;
     font-weight:bold;
 }
+
+.loading{
+    padding:20px;
+    font-size:18px;
+}
+
 </style>
 </head>
 <body>
 
-<h2>BFL Live Table</h2>
+<div class="container">
+
+<h1>BFL Live Table</h1>
 
 <select id="nameDropdown">
     <option value="">Select a Name</option>
 </select>
+
+<div id="status" class="loading">
+    Loading data...
+</div>
 
 <table id="liveTable">
     <thead></thead>
     <tbody></tbody>
 </table>
 
+</div>
+
 <script>
 
 const APPS_SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbw6XAEtQIG0jEhmDRAIHW53ldWJqu3sQ37onc0gYZ2ZSGWumY02ydRamJmHFjlML0JA/exec";
 
-let tableRows = [];
 let headers = [];
+let tableRows = [];
 
-async function loadData() {
+function loadData() {
 
-    const response = await fetch(APPS_SCRIPT_URL);
-    const data = await response.json();
+    const script = document.createElement("script");
 
-    headers = data.headers;
-    tableRows = data.rows;
+    script.src =
+        APPS_SCRIPT_URL +
+        "?callback=handleData&_=" +
+        new Date().getTime();
 
-    populateDropdown(data.names);
+    script.onerror = () => {
+        document.getElementById("status").innerHTML =
+            "Failed to load data.";
+    };
+
+    document.body.appendChild(script);
+}
+
+function handleData(data) {
+
+    headers = data.headers || [];
+    tableRows = data.rows || [];
+
+    populateDropdown(data.names || []);
+
     buildTable();
+
+    document.getElementById("status").style.display = "none";
 }
 
 function populateDropdown(names) {
 
-    const dropdown = document.getElementById("nameDropdown");
+    const dropdown =
+        document.getElementById("nameDropdown");
+
+    dropdown.innerHTML =
+        '<option value="">Select a Name</option>';
+
+    names.sort();
 
     names.forEach(name => {
-        const option = document.createElement("option");
+
+        const option =
+            document.createElement("option");
+
         option.value = name;
         option.textContent = name;
+
         dropdown.appendChild(option);
     });
 }
 
 function buildTable(selectedName = "") {
 
-    const thead = document.querySelector("#liveTable thead");
-    const tbody = document.querySelector("#liveTable tbody");
+    const thead =
+        document.querySelector("#liveTable thead");
+
+    const tbody =
+        document.querySelector("#liveTable tbody");
 
     thead.innerHTML = "";
     tbody.innerHTML = "";
 
-    // Header row
-    const headerRow = document.createElement("tr");
+    if (!headers.length) return;
+
+    const headerRow =
+        document.createElement("tr");
 
     headers.forEach(header => {
-        const th = document.createElement("th");
+
+        const th =
+            document.createElement("th");
+
         th.textContent = header;
+
         headerRow.appendChild(th);
     });
 
     thead.appendChild(headerRow);
 
-    // Find Name column
-    const nameColumnIndex = headers.findIndex(
-        h => String(h).trim().toLowerCase() === "name"
-    );
+    const nameColumnIndex =
+        headers.findIndex(h =>
+            String(h)
+                .trim()
+                .toLowerCase() === "name"
+        );
 
     tableRows.forEach(row => {
 
-        const tr = document.createElement("tr");
+        const tr =
+            document.createElement("tr");
 
         if (
             selectedName &&
-            nameColumnIndex >= 0 &&
+            nameColumnIndex !== -1 &&
             String(row[nameColumnIndex]).trim() === selectedName
         ) {
             tr.classList.add("highlight");
+
+            // move selected row to top
+            tbody.insertBefore(
+                tr,
+                tbody.firstChild
+            );
         }
 
         row.forEach(cell => {
-            const td = document.createElement("td");
-            td.textContent = cell;
+
+            const td =
+                document.createElement("td");
+
+            td.textContent =
+                cell === null ? "" : cell;
+
             tr.appendChild(td);
         });
 
-        tbody.appendChild(tr);
+        if (!tr.parentNode) {
+            tbody.appendChild(tr);
+        }
+
     });
+
 }
 
 document
@@ -133,6 +227,7 @@ document
 .addEventListener("change", function() {
 
     buildTable(this.value);
+
 });
 
 loadData();
