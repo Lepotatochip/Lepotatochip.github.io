@@ -1,19 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>BFL Live Table</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    margin:20px;
+}
+
+select{
+    padding:8px;
+    font-size:16px;
+    margin-bottom:20px;
+}
+
+table{
+    border-collapse:collapse;
+    width:100%;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:left;
+}
+
+th{
+    background:#f5f5f5;
+}
+
+.highlight{
+    background-color:yellow !important;
+    font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<h2>BFL Live Table</h2>
+
+<select id="nameDropdown">
+    <option value="">Select a Name</option>
+</select>
+
+<table id="liveTable">
+    <thead></thead>
+    <tbody></tbody>
+</table>
+
 <script>
 
-const SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbw6XAEtQIG0jEhmDRAIHW53ldWJqu3sQ37onc0gYZ2ZSGWumY02ydRamJmHFjlML0JA/exec";
+const APPS_SCRIPT_URL =
+"hhttps://script.google.com/macros/s/AKfycbw6XAEtQIG0jEhmDRAIHW53ldWJqu3sQ37onc0gYZ2ZSGWumY02ydRamJmHFjlML0JA/exec";
+
+let tableRows = [];
+let headers = [];
 
 async function loadData() {
 
-    const response =
-        await fetch(SCRIPT_URL);
+    const response = await fetch(APPS_SCRIPT_URL);
+    const data = await response.json();
 
-    standingsData =
-        await response.json();
+    headers = data.headers;
+    tableRows = data.rows;
 
-    populateDropdown();
-    renderTable();
+    populateDropdown(data.names);
+    buildTable();
 }
 
+function populateDropdown(names) {
+
+    const dropdown = document.getElementById("nameDropdown");
+
+    names.forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        dropdown.appendChild(option);
+    });
+}
+
+function buildTable(selectedName = "") {
+
+    const thead = document.querySelector("#liveTable thead");
+    const tbody = document.querySelector("#liveTable tbody");
+
+    thead.innerHTML = "";
+    tbody.innerHTML = "";
+
+    // Header row
+    const headerRow = document.createElement("tr");
+
+    headers.forEach(header => {
+        const th = document.createElement("th");
+        th.textContent = header;
+        headerRow.appendChild(th);
+    });
+
+    thead.appendChild(headerRow);
+
+    // Find Name column
+    const nameColumnIndex = headers.findIndex(
+        h => String(h).trim().toLowerCase() === "name"
+    );
+
+    tableRows.forEach(row => {
+
+        const tr = document.createElement("tr");
+
+        if (
+            selectedName &&
+            nameColumnIndex >= 0 &&
+            String(row[nameColumnIndex]).trim() === selectedName
+        ) {
+            tr.classList.add("highlight");
+        }
+
+        row.forEach(cell => {
+            const td = document.createElement("td");
+            td.textContent = cell;
+            tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+    });
+}
+
+document
+.getElementById("nameDropdown")
+.addEventListener("change", function() {
+
+    buildTable(this.value);
+});
+
 loadData();
+
 </script>
+
+</body>
+</html>
