@@ -156,18 +156,15 @@ async function loadData(initialLoad = false){
 
 function populateDropdown(names){
 
-    const dropdown =
-        document.getElementById("nameDropdown");
+    const dropdown = document.getElementById("nameDropdown");
 
-    dropdown.innerHTML =
-        '<option value="">Select a Name</option>';
+    dropdown.innerHTML = '<option value="">Select a Name</option>';
 
     names.sort();
 
     names.forEach(name => {
 
-        const option =
-            document.createElement("option");
+        const option = document.createElement("option");
 
         option.value = name;
         option.textContent = name;
@@ -178,24 +175,20 @@ function populateDropdown(names){
 
 function buildTable(selectedName = ""){
 
-    const thead =
-        document.querySelector("#liveTable thead");
+    const thead = document.querySelector("#liveTable thead");
 
-    const tbody =
-        document.querySelector("#liveTable tbody");
+    const tbody = document.querySelector("#liveTable tbody");
 
     thead.innerHTML = "";
     tbody.innerHTML = "";
 
     if(!headers.length) return;
 
-    const headerRow =
-        document.createElement("tr");
+    const headerRow = document.createElement("tr");
 
     headers.forEach(header => {
 
-        const th =
-            document.createElement("th");
+        const th = document.createElement("th");
 
         th.textContent = header;
 
@@ -206,39 +199,23 @@ function buildTable(selectedName = ""){
 
     const nameIndex =
         headers.findIndex(
-            h =>
-                String(h)
-                .trim()
-                .toLowerCase() ===
-                "name"
+            h => String(h).trim().toLowerCase() === "name"
         );
 
     const requirementIndex =
         headers.findIndex(
             h =>
-                String(h)
-                .trim()
-                .toLowerCase() ===
-                "820 Requirement"
+                String(h).trim().toLowerCase() === "820 Requirement"
         );
 
     let selectedIndex = -1;
 
     if(selectedName){
 
-        selectedIndex =
-            tableRows.findIndex(
-                row =>
-                    String(
-                        row[nameIndex]
-                    ).trim() === selectedName
-            );
+        selectedIndex =tableRows.findIndex(row => String(row[nameIndex]).trim() === selectedName);
     }
 
-    updatePlacement(
-        selectedIndex,
-        requirementIndex
-    );
+    updatePlacement(selectedIndex, requirementIndex);
 
     tableRows.forEach((row,rowIndex)=>{
 
@@ -265,8 +242,7 @@ function buildTable(selectedName = ""){
             const td =
                 document.createElement("td");
 
-            td.textContent =
-                cell ?? "";
+            td.textContent = cell ?? "";
 
             tr.appendChild(td);
         });
@@ -279,59 +255,38 @@ function buildTable(selectedName = ""){
 
     if(selectedRow){
 
-        selectedRow.scrollIntoView({
-            behavior:"smooth",
-            block:"center"
-        });
+        selectedRow.scrollIntoView({behavior:"smooth",block:"center"});
     }
 }
 
-function updatePlacement(
-    selectedIndex,
-    requirementIndex
-){
-
+function updatePlacement(selectedIndex, requirementIndex)
+{
     const placementValue =
-        document.getElementById(
-            "placementValue"
-        );
+        document.getElementById("placementValue");
 
-    if(
-        selectedIndex < 0 ||
-        requirementIndex < 0
-    ){
+    if(selectedIndex < 0 || requirementIndex < 0)
+    {
         placementValue.textContent = "-";
         return;
     }
 
     let autoQualifiedAbove = 0;
 
-    for(
-        let i = 0;
-        i < selectedIndex;
-        i++
-    ){
+    for(let i = 0; i < selectedIndex; i++)
+    {
 
-        const value =
-            String(
-                tableRows[i][requirementIndex] || ""
-            )
-            .trim()
-            .toLowerCase();
+        const value =String(tableRows[i][requirementIndex] || "").trim().toLowerCase();
 
         if(value === "autoqualified"){
-
             autoQualifiedAbove++;
         }
     }
 
-    const placement =
-        selectedIndex -
-        autoQualifiedAbove +
-        1;
+    const placement = selectedIndex - autoQualifiedAbove + 1;
+    console.log(selectedIndex);
+    console.log(autoQualifiedAbove);
 
-    placementValue.textContent =
-        placement;
+    placementValue.textContent = placement;
 }
 
 document
@@ -349,7 +304,7 @@ loadData(true);
 // Refresh every 30 seconds
 setInterval(
     () => loadData(false),
-    10000
+    100000
 );
 
 </script>
