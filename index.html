@@ -86,7 +86,7 @@ tr:nth-child(even){
 
 <div class="container">
 
-<h1>Live NAIC Leaderboard</h1>
+<h1>Live NA Leaderboard</h1>
 
 <div class="controls">
 
@@ -130,6 +130,7 @@ async function loadData(initialLoad = false){
 
         headers = data.headers || [];
         tableRows = data.rows || [];
+        console.log("Headers:", headers);
 
         if(initialLoad){
             populateDropdown(data.names || []);
@@ -194,7 +195,7 @@ function buildTable(selectedName = ""){
 
     const requirementIndex =
         headers.findIndex(
-            h => String(h).trim().toLowerCase() === "820 Requirement"
+            h => String(h).toLowerCase().includes("820")
         );
 
     let selectedIndex = -1;
