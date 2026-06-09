@@ -324,13 +324,18 @@ function buildTable(selectedName = ""){
 
     for(let i = 0; i < visibleRows.length; i++){
         if(
-            visibleRows[i].originalIndex >
-            cutoffIndex
+            visibleRows[i].originalIndex > cutoffIndex
         ){
             visibleCutoffPosition = i - 1;
             break;
         }
+    }
 
+    if(visibleCutoffPosition === -1 && visibleRows.length > 0){
+        visibleCutoffPosition = visibleRows.length - 1;
+    }
+
+    
     visibleRows.forEach((item, visibleIndex)=>{
     
         const row = item.row;
@@ -348,9 +353,11 @@ function buildTable(selectedName = ""){
             String(row[requirementIndex] || "").trim().toLowerCase();
     
         if(requirementValue.includes("autoqualified")){
-            tr.classList.add(
-                "autoqualified-row"
-            );
+            tr.classList.add("autoqualified-row");
+        }
+
+        if(visibleIndex === visibleCutoffPosition){
+            tr.classList.add("cutoff-row");
         }
     
         row.forEach(cell=>{const td =document.createElement("td");
