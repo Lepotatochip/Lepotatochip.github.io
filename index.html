@@ -24,6 +24,31 @@ h1{
     margin-bottom:20px;
 }
 
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.page-header h1{
+    margin:0;
+}
+
+.matches-button{
+    padding:10px 20px;
+    background:#222;
+    color:white;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.matches-button:hover{
+    background:#444;
+}
+
 .controls{
     display:flex;
     align-items:center;
@@ -111,7 +136,15 @@ tr:nth-child(even){
 
 <div class="container">
 
-<h1>Live NA Leaderboard</h1>
+<div class="page-header">
+    <h1>Live NA Leaderboard</h1>
+
+    <button
+        class="matches-button"
+        onclick="window.location.href='matches.html'">
+        Matches
+    </button>
+</div>
 
 <div class="controls">
 
