@@ -111,7 +111,31 @@ async function loadMatches(){
     const data =
         await response.json();
 
-    document.getElementById("round").textContent =
+    const roundValue = Number(data.round);
+    
+    const roundHeader =
+        document.getElementById("round");
+    
+    const status =
+        document.getElementById("status");
+    
+    const table =
+        document.getElementById("matchTable");
+    
+    // Round complete
+    if (roundValue === 0) {
+    
+        roundHeader.textContent =
+            "Matches Complete";
+    
+        status.style.display = "none";
+        table.style.display = "none";
+    
+        return;
+    }
+    
+    // Normal display
+    roundHeader.textContent =
         "Round: " + data.round;
 
     const tbody =
