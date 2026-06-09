@@ -89,7 +89,7 @@ tr:nth-child(even){
 }
 
 .cutoff-row::after{
-    content:"TOP 80 CUTOFF";
+    content:"QUALIFICATION LINE";
     position:absolute;
     right:10px;
     bottom:-22px;
@@ -221,29 +221,41 @@ function buildTable(selectedName = ""){
     const naicStatusIndex = headers.findIndex(h => String(h).trim().toLowerCase() === "naic status");
     
     let selectedIndex = -1;
-    let cutoffIndex = -1
-
+    let cutoffIndex = -1;
+    
     if(requirementIndex >= 0){
-
-    let autoQualifiedCount = 0;
+    
+        let autoQualifiedCount = 0;
+    
         for(let i = 0; i < tableRows.length; i++){
-            const value = String(tableRows[i][requirementIndex] || "").trim().toLowerCase();
+    
+            const value =String(tableRows[i][requirementIndex] || "").trim().toLowerCase();
     
             if(value.includes("autoqualified")){
                 autoQualifiedCount++;
             }
     
-            const placementWithoutAQ =
-                (i + 1) - autoQualifiedCount;
+            const placementWithoutAQ = (i + 1) - autoQualifiedCount;
     
             if(placementWithoutAQ === 80){
                 cutoffIndex = i;
                 break;
             }
         }
+    
+        // Push the cutoff downward until the first
+        // player below it is not Autoqualified
+    
+        while(cutoffIndex >= 0 && cutoffIndex < tableRows.length - 1){
+            const nextPlayerStatus = String(tableRows[cutoffIndex + 1][requirementIndex] || "").trim().toLowerCase();
+            if(
+                !nextPlayerStatus.includes("autoqualified")
+            ){
+                break;
+            }
+            cutoffIndex++;
+        }
     }
-
-
     
     if(selectedName){
         selectedIndex =tableRows.findIndex(row => String(row[nameIndex]).trim() === selectedName);
