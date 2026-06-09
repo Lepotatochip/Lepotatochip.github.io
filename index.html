@@ -278,51 +278,95 @@ function buildTable(selectedName = ""){
     
     updatePlacement(selectedIndex, requirementIndex);
 
+    const visibleRows=[];
+    let visibleCutoffPosition = -1;
+    
     tableRows.forEach((row,rowIndex)=>{
-
+    
+        let shouldRender = true;
+    
+        // 10-above filter
+    
         if(selectedIndex >= 0){
-            // Hide anyone more than 10 spots above
+    
             if(rowIndex < selectedIndex - 10){
-                return;
+                shouldRender = false;
             }
         }
+    
+        // Attendance filter
+    
         const filterEnabled =
             document.getElementById("attendanceFilter").checked;
-        
+    
         if(
             filterEnabled &&
             selectedIndex >= 0 &&
             rowIndex > selectedIndex &&
             naicStatusIndex >= 0
         ){
-            const status = String(row[naicStatusIndex] || "").trim().toLowerCase();
-        
+    
+            const status =
+                String(row[naicStatusIndex] || "" ).trim().toLowerCase();
+    
             if(
                 status === "not attending" ||
                 status === "eliminated"
             ){
-                return;
+                shouldRender = false;
             }
         }
-        const tr =
-            document.createElement("tr");
+    
+        if(shouldRender){
+            visibleRows.push({row: row, originalIndex: rowIndex});
+        }
+    });
 
+    for(let i = 0; i < visibleRows.length; i++){
+        if(
+            visibleRows[i].originalIndex >
+            cutoffIndex
+        ){
+            visibleCutoffPosition = i - 1;
+            break;
+        }
+
+    visibleRows.forEach((item, visibleIndex)=>{
+    
+        const row = item.row;
+        const rowIndex = item.originalIndex;
+    
+        const tr = document.createElement("tr");
+    
         if(rowIndex === selectedIndex){
+    
             tr.classList.add("highlight");
             tr.id = "selectedRow";
         }
-
-        if(rowIndex === cutoffIndex){
+    
+        const requirementValue =
+            String(row[requirementIndex] || "").trim().toLowerCase();
+    
+        if(requirementValue.includes("autoqualified")){
+            tr.classList.add(
+                "autoqualified-row"
+            );
+        }
+    
+        if(visibleIndex === visibleCutoffPosition){
             tr.classList.add("cutoff-row");
         }
-        
-        row.forEach(cell => {
-            const td = document.createElement("td");
+    
+        row.forEach(cell=>{const td =document.createElement("td");
+    
             td.textContent = cell ?? "";
             tr.appendChild(td);
         });
         tbody.appendChild(tr);
     });
+}
+
+    
 
     const selectedRow = document.getElementById("selectedRow");
 
