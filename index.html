@@ -353,10 +353,6 @@ function buildTable(selectedName = ""){
             );
         }
     
-        if(visibleIndex === visibleCutoffPosition){
-            tr.classList.add("cutoff-row");
-        }
-    
         row.forEach(cell=>{const td =document.createElement("td");
     
             td.textContent = cell ?? "";
