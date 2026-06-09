@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="utf-8">
+
+<title>NAIC Match Watch</title>
+
+<style>
+
+body{
+    background:#111;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    margin:20px;
+}
+
+h1{
+    margin-bottom:20px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#222;
+    padding:10px;
+    text-align:left;
+}
+
+td{
+    padding:8px;
+    border-bottom:1px solid #333;
+}
+
+tr:hover{
+    background:#1c1c1c;
+}
+
+.score{
+    font-weight:bold;
+    color:#6cff6c;
+}
+
+.loading{
+    color:#888;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1 id="round">
+Loading...
+</h1>
+
+<div id="status" class="loading">
+Loading matches...
+</div>
+
+<table id="matchTable" style="display:none;">
+    <thead>
+        <tr>
+            <th>Rank</th>
+            <th>Player 1</th>
+            <th>Player 2</th>
+            <th>Record</th>
+            <th>Req 1</th>
+            <th>Req 2</th>
+            <th>MatchScore</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+
+const WEB_APP_URL =
+"https://script.google.com/macros/s/AKfycbzEUWojsIjACLYQqmZ7mq-m0mnKc6Rfm2sOjcmjaNfUY7wiWJ7LB_h87sHf24c6MjtM/exec";
+
+async function loadMatches(){
+
+    const response =
+        await fetch(WEB_APP_URL);
+
+    const data =
+        await response.json();
+
+    document.getElementById("round").textContent =
+        "Round: " + data.round;
+
+    const tbody =
+        document.querySelector("#matchTable tbody");
+
+    tbody.innerHTML = "";
+
+    data.matches.forEach((match,index)=>{
+
+        const row =
+            document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${match.player1}</td>
+            <td>${match.player2}</td>
+            <td>${match.wins}-${match.losses}</td>
+            <td>${match.requirement1}</td>
+            <td>${match.requirement2}</td>
+            <td class="score">${match.matchScore}</td>
+        `;
+
+        tbody.appendChild(row);
+
+    });
+
+    document.getElementById("status").style.display =
+        "none";
+
+    document.getElementById("matchTable").style.display =
+        "table";
+}
+
+loadMatches();
+
+// refresh every 60 seconds
+setInterval(loadMatches,60000);
+
+</script>
+
+</body>
+</html>
