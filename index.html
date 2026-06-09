@@ -17,7 +17,6 @@ body{
 .container{
     max-width:1600px;
     margin:auto;
-    padding-right:220px;
 }
 
 h1{
@@ -115,10 +114,11 @@ tr:nth-child(even){
 }
 
 
-.cutoff-row td:last-child::before{
+.cutoff-row td:last-child::after{
     content:"QUALIFICATION LINE";
     position:absolute;
-    right:-190px;
+    left:100%;
+    margin-left:10px;
     top:50%;
     transform:translateY(-50%);
     background:#ff4444;
@@ -127,7 +127,6 @@ tr:nth-child(even){
     padding:6px 12px;
     border-radius:4px;
     white-space:nowrap;
-    pointer-events:none;
 }
     
 </style>
