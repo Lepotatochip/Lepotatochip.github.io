@@ -184,7 +184,7 @@ tr:nth-child(even){
 <script>
 
 const APPS_SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbyH2YdMIRXP1XQYrGsCQmmPNsVu_vo5TEuob2MTNmTpUD84sPUVm1U88Rc7pHpvUMcf/exec";
+"https://script.google.com/macros/s/AKfycbwXMed7N_WaHJCjFVzQnjDwqhfnnAjcXbn0ozra1FUKHBsiD9hXaASAOyLTYeUx_ehK/exec";
 
 let headers = [];
 let tableRows = [];
@@ -194,7 +194,7 @@ async function loadData(initialLoad = false){
     try{
 
         const response = await fetch(
-            APPS_SCRIPT_URL + "?t=" + Date.now()
+            APPS_SCRIPT_URL + "&t=" + Date.now()
         );
 
         const data = await response.json();
