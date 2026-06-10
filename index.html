@@ -155,9 +155,16 @@ tr:nth-child(even){
 
 <div class="controls">
 
-    <select id="nameDropdown">
-        <option value="">Choose a Name</option>
-    </select>
+<div class="searchable-dropdown">
+    <input
+        type="text"
+        id="nameSearch"
+        placeholder="Search player..."
+        autocomplete="off"
+    >
+
+    <div id="nameDropdown" class="dropdown-list"></div>
+</div>
 
     <div id="placementBox">
         Placement without Autoqualifiers:
